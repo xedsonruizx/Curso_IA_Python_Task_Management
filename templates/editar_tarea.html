@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Tarea - Mi App Flask{% endblock %}
+
+{% block content %}
+<div class="editar-tarea-container">
+    <h1>✏️ Editar Tarea</h1>
+    
+    <div class="editar-formulario">
+        <form method="POST" action="{{ url_for('actualizar_tarea', tarea_id=tarea.id) }}" class="tarea-form" {% if tarea.hecho %}onsubmit="return false;"{% endif %}>
+            <div class="form-group">
+                <label for="texto">Texto de la tarea:</label>
+                <textarea id="texto" name="texto" rows="3" required maxlength="200" 
+                          placeholder="Escribe el nuevo texto de la tarea..." {% if tarea.hecho %}disabled{% endif %}>{{ tarea.texto }}</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Estado actual:</label>
+                <div class="estado-actual">
+                    {% if tarea.hecho %}
+                        <span class="estado-completada">✅ Completada - No editable</span>
+                        <div class="mensaje-no-editable">
+                            <p>⚠️ Esta tarea está completada y no se puede editar.</p>
+                        </div>
+                    {% else %}
+                        <span class="estado-pendiente">⏳ Pendiente</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Información de la tarea:</label>
+                <div class="info-tarea">
+                    <p><strong>📅 Creada:</strong> {{ tarea.fecha_creacion }}</p>
+                    {% if tarea.fecha_completado %}
+                        <p><strong>✅ Completada:</strong> {{ tarea.fecha_completado }}</p>
+                    {% endif %}
+                    {% if tarea.fecha_modificacion %}
+                        <p><strong>✏️ Última modificación:</strong> {{ tarea.fecha_modificacion }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="botones-accion">
+                <button type="submit" class="btn btn-primary" {% if tarea.hecho %}disabled{% endif %}>
+                    {% if tarea.hecho %}🔒 No editable{% else %}💾 Guardar Cambios{% endif %}
+                </button>
+                <a href="{{ url_for('mostrar_tareas') }}" class="btn btn-secondary">
+                    ↩️ Volver a Tareas
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    <div class="acciones-adicionales">
+        <h3>Otras acciones</h3>
+        <div class="botones-accion">
+            {% if not tarea.hecho %}
+                <a href="{{ url_for('completar_tarea', tarea_id=tarea.id) }}" 
+                   class="btn btn-success"
+                   onclick="return confirm('¿Marcar como completada?')">
+                    ✅ Completar Tarea
+                </a>
+            {% endif %}
+            <a href="{{ url_for('eliminar_tarea', tarea_id=tarea.id) }}" 
+               class="btn btn-danger"
+               onclick="return confirm('¿Eliminar esta tarea? Esta acción no se puede deshacer.')">
+                🗑️ Eliminar Tarea
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-focus en el textarea
+document.addEventListener('DOMContentLoaded', function() {
+    const textarea = document.getElementById('texto');
+    if (textarea) {
+        textarea.focus();
+        // Seleccionar todo el texto para facilitar la edición
+        textarea.select();
+    }
+});
+
+// Contador de caracteres
+const textarea = document.getElementById('texto');
+if (textarea) {
+    const maxLength = 200;
+    const counter = document.createElement('div');
+    counter.className = 'char-counter';
+    counter.style.cssText = 'text-align: right; color: #7f8c8d; font-size: 0.9rem; margin-top: 0.5rem;';
+    textarea.parentNode.appendChild(counter);
+    
+    function updateCounter() {
+        const remaining = maxLength - textarea.value.length;
+        counter.textContent = `${textarea.value.length}/${maxLength} caracteres`;
+        if (remaining < 20) {
+            counter.style.color = '#e74c3c';
+        } else {
+            counter.style.color = '#7f8c8d';
+        }
+    }
+    
+    textarea.addEventListener('input', updateCounter);
+    updateCounter();
+}
+</script>
+{% endblock %}

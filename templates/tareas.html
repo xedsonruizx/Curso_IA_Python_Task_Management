@@ -59,10 +59,21 @@
                                         ✅ Completada: {{ tarea.fecha_completado }}
                                     </small>
                                 {% endif %}
+                                {% if tarea.fecha_modificacion %}
+                                    <small class="fecha-modificacion">
+                                        ✏️ Modificada: {{ tarea.fecha_modificacion }}
+                                    </small>
+                                {% endif %}
                             </div>
                         </div>
                         
                         <div class="tarea-acciones">
+                            {% if not tarea.hecho %}
+                                <a href="{{ url_for('editar_tarea', tarea_id=tarea.id) }}" 
+                                   class="btn btn-warning btn-sm">
+                                    ✏️ Editar
+                                </a>
+                            {% endif %}
                             {% if not tarea.hecho %}
                                 <a href="{{ url_for('completar_tarea', tarea_id=tarea.id) }}" 
                                    class="btn btn-success btn-sm"

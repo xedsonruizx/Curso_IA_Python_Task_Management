@@ -7,7 +7,7 @@ app = Flask(__name__)
 # Configuración básica
 app.config['SECRET_KEY'] = 'tu-clave-secreta-aqui'
 
-# Lista en memoria para almacenar tareas
+# Lista en memoria para almacenar tareas (solo durante la ejecución)
 tareas = []
 contador_id = 1
 
@@ -86,6 +86,48 @@ def eliminar_tarea(tarea_id):
             texto_tarea = tarea['texto']
             del tareas[i]
             flash(f'Tarea "{texto_tarea}" eliminada', 'success')
+            break
+    else:
+        flash('Tarea no encontrada', 'error')
+    
+    return redirect(url_for('mostrar_tareas'))
+
+@app.route('/editar/<int:tarea_id>')
+def editar_tarea(tarea_id):
+    """Mostrar formulario de edición"""
+    global tareas
+    
+    for tarea in tareas:
+        if tarea['id'] == tarea_id:
+            if tarea['hecho']:
+                flash('No se puede editar una tarea completada', 'error')
+                return redirect(url_for('mostrar_tareas'))
+            return render_template('editar_tarea.html', tarea=tarea)
+    
+    flash('Tarea no encontrada', 'error')
+    return redirect(url_for('mostrar_tareas'))
+
+@app.route('/actualizar/<int:tarea_id>', methods=['POST'])
+def actualizar_tarea(tarea_id):
+    """Actualizar el texto de una tarea"""
+    global tareas
+    
+    nuevo_texto = request.form.get('texto', '').strip()
+    
+    if not nuevo_texto:
+        flash('El texto de la tarea no puede estar vacío', 'error')
+        return redirect(url_for('editar_tarea', tarea_id=tarea_id))
+    
+    for tarea in tareas:
+        if tarea['id'] == tarea_id:
+            if tarea['hecho']:
+                flash('No se puede editar una tarea completada', 'error')
+                return redirect(url_for('mostrar_tareas'))
+            
+            texto_anterior = tarea['texto']
+            tarea['texto'] = nuevo_texto
+            tarea['fecha_modificacion'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            flash(f'Tarea actualizada: "{texto_anterior}" → "{nuevo_texto}"', 'success')
             break
     else:
         flash('Tarea no encontrada', 'error')
