@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Tareas - Mi App Flask{% endblock %}
+
+{% block content %}
+<div class="tareas-container">
+    <h1>📝 Lista de Tareas</h1>
+    
+    <!-- Formulario para agregar nueva tarea -->
+    <div class="agregar-tarea">
+        <h2>Agregar Nueva Tarea</h2>
+        <form method="POST" action="{{ url_for('agregar_tarea') }}" class="tarea-form">
+            <div class="form-group">
+                <input type="text" name="texto" placeholder="Escribe tu tarea aquí..." required maxlength="200">
+                <button type="submit" class="btn btn-primary">➕ Agregar Tarea</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="estadisticas">
+        <div class="stat-card">
+            <h3>{{ lista_tareas|length }}</h3>
+            <p>Total de tareas</p>
+        </div>
+        <div class="stat-card">
+            <h3>{{ lista_tareas|selectattr('hecho')|list|length }}</h3>
+            <p>Completadas</p>
+        </div>
+        <div class="stat-card">
+            <h3>{{ lista_tareas|rejectattr('hecho')|list|length }}</h3>
+            <p>Pendientes</p>
+        </div>
+    </div>
+
+    <!-- Lista de tareas -->
+    <div class="lista-tareas">
+        <h2>Mis Tareas</h2>
+        
+        {% if lista_tareas %}
+            <div class="tareas-grid">
+                {% for tarea in lista_tareas %}
+                    <div class="tarea-item {% if tarea.hecho %}completada{% endif %}">
+                        <div class="tarea-contenido">
+                            <div class="tarea-texto">
+                                {% if tarea.hecho %}
+                                    <span class="tarea-completada">✅ {{ tarea.texto }}</span>
+                                {% else %}
+                                    <span class="tarea-pendiente">⏳ {{ tarea.texto }}</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="tarea-fechas">
+                                <small class="fecha-creacion">
+                                    📅 Creada: {{ tarea.fecha_creacion }}
+                                </small>
+                                {% if tarea.hecho and tarea.fecha_completado %}
+                                    <small class="fecha-completado">
+                                        ✅ Completada: {{ tarea.fecha_completado }}
+                                    </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="tarea-acciones">
+                            {% if not tarea.hecho %}
+                                <a href="{{ url_for('completar_tarea', tarea_id=tarea.id) }}" 
+                                   class="btn btn-success btn-sm"
+                                   onclick="return confirm('¿Marcar como completada?')">
+                                    ✅ Completar
+                                </a>
+                            {% endif %}
+                            <a href="{{ url_for('eliminar_tarea', tarea_id=tarea.id) }}" 
+                               class="btn btn-danger btn-sm"
+                               onclick="return confirm('¿Eliminar esta tarea?')">
+                                🗑️ Eliminar
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="sin-tareas">
+                <div class="empty-state">
+                    <h3>🎉 ¡No hay tareas pendientes!</h3>
+                    <p>Agrega una nueva tarea usando el formulario de arriba.</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Acciones adicionales -->
+    <div class="acciones-adicionales">
+        <h3>Acciones Rápidas</h3>
+        <div class="botones-accion">
+            <button onclick="marcarTodasCompletadas()" class="btn btn-secondary">
+                ✅ Marcar todas como completadas
+            </button>
+            <button onclick="eliminarCompletadas()" class="btn btn-warning">
+                🗑️ Eliminar completadas
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function marcarTodasCompletadas() {
+    if (confirm('¿Marcar todas las tareas como completadas?')) {
+        const tareasPendientes = document.querySelectorAll('.tarea-item:not(.completada) .btn-success');
+        tareasPendientes.forEach(btn => {
+            if (btn) btn.click();
+        });
+    }
+}
+
+function eliminarCompletadas() {
+    if (confirm('¿Eliminar todas las tareas completadas?')) {
+        const tareasCompletadas = document.querySelectorAll('.tarea-item.completada .btn-danger');
+        tareasCompletadas.forEach(btn => {
+            if (btn) btn.click();
+        });
+    }
+}
+</script>
+{% endblock %}

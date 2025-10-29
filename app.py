@@ -1,15 +1,25 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
 import os
+from datetime import datetime
 
 app = Flask(__name__)
 
 # Configuración básica
 app.config['SECRET_KEY'] = 'tu-clave-secreta-aqui'
 
+# Lista en memoria para almacenar tareas
+tareas = []
+contador_id = 1
+
 @app.route('/')
 def index():
-    """Página principal"""
-    return render_template('index.html')
+    """Página principal - Redirige a tareas"""
+    return redirect(url_for('mostrar_tareas'))
+
+@app.route('/tareas')
+def mostrar_tareas():
+    """Página principal de tareas"""
+    return render_template('tareas.html', lista_tareas=tareas)
 
 @app.route('/about')
 def about():
@@ -25,6 +35,62 @@ def api_data():
         'data': [1, 2, 3, 4, 5]
     }
     return jsonify(data)
+
+@app.route('/agregar', methods=['POST'])
+def agregar_tarea():
+    """Procesar formulario de nueva tarea"""
+    global contador_id
+    
+    texto = request.form.get('texto', '').strip()
+    
+    if not texto:
+        flash('El texto de la tarea no puede estar vacío', 'error')
+        return redirect(url_for('tareas'))
+    
+    nueva_tarea = {
+        'id': contador_id,
+        'texto': texto,
+        'hecho': False,
+        'fecha_creacion': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    }
+    
+    tareas.append(nueva_tarea)
+    contador_id += 1
+    
+    flash(f'Tarea "{texto}" agregada correctamente', 'success')
+    return redirect(url_for('mostrar_tareas'))
+
+@app.route('/completar/<int:tarea_id>')
+def completar_tarea(tarea_id):
+    """Marcar una tarea como completada"""
+    global tareas
+    
+    for tarea in tareas:
+        if tarea['id'] == tarea_id:
+            tarea['hecho'] = True
+            tarea['fecha_completado'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            flash(f'Tarea "{tarea["texto"]}" marcada como completada', 'success')
+            break
+    else:
+        flash('Tarea no encontrada', 'error')
+    
+    return redirect(url_for('mostrar_tareas'))
+
+@app.route('/eliminar/<int:tarea_id>')
+def eliminar_tarea(tarea_id):
+    """Eliminar una tarea"""
+    global tareas
+    
+    for i, tarea in enumerate(tareas):
+        if tarea['id'] == tarea_id:
+            texto_tarea = tarea['texto']
+            del tareas[i]
+            flash(f'Tarea "{texto_tarea}" eliminada', 'success')
+            break
+    else:
+        flash('Tarea no encontrada', 'error')
+    
+    return redirect(url_for('mostrar_tareas'))
 
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
