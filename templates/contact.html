@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Contacto - Mi App Flask{% endblock %}
+
+{% block content %}
+<div class="contact-section">
+    <h1>Contacto</h1>
+    
+    {% if success %}
+        <div class="success-message">
+            <h2>¡Gracias {{ name }}!</h2>
+            <p>Tu mensaje ha sido enviado correctamente.</p>
+        </div>
+    {% else %}
+        <form method="POST" class="contact-form">
+            <div class="form-group">
+                <label for="name">Nombre:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="message">Mensaje:</label>
+                <textarea id="message" name="message" rows="5" required></textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Enviar Mensaje</button>
+        </form>
+    {% endif %}
+</div>
+{% endblock %}

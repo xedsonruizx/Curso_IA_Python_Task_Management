@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio - Mi App Flask{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>Bienvenido a Mi App Flask</h1>
+    <p>Una aplicación web simple construida con Flask</p>
+    <a href="{{ url_for('about') }}" class="btn btn-primary">Conoce más</a>
+</div>
+
+<div class="features">
+    <div class="feature-card">
+        <h3>🚀 Rápido</h3>
+        <p>Desarrollado con Flask para máxima velocidad</p>
+    </div>
+    <div class="feature-card">
+        <h3>🔧 Flexible</h3>
+        <p>Fácil de personalizar y extender</p>
+    </div>
+    <div class="feature-card">
+        <h3>📱 Responsive</h3>
+        <p>Funciona en todos los dispositivos</p>
+    </div>
+</div>
+
+<div class="api-demo">
+    <h2>API Demo</h2>
+    <button id="api-btn" class="btn btn-secondary">Probar API</button>
+    <div id="api-result" class="api-result"></div>
+</div>
+{% endblock %}
